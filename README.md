@@ -8,6 +8,7 @@ Nobody else has implemented it yet.
 
 - [The specification, version 1](site/v1/index.html)
 - [Test vectors](site/v1/test-vectors.json)
+- [JSON Schema for the record](site/v1/record.schema.json)
 
 ## The problem
 

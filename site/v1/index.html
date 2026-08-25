@@ -70,6 +70,13 @@
 </section>
 
 <section>
+  <h2>3a · The JSON Schema</h2>
+  <p>A machine-readable description of the record's structure is published at <a href="record.schema.json">record.schema.json</a> (JSON Schema draft 2020-12).</p>
+  <p>It describes <strong>structure only</strong>, and it deliberately permits <code>null</code>, empty strings and empty arrays, because under §3 those are legal ways of saying a field was not answered. A schema demanding non-empty values would reject perfectly valid records.</p>
+  <p class="callout">Passing the schema is <strong>not</strong> conformance. The schema cannot express the canonicalisation rules and knows nothing about whether the certificate is any good. Conformance is decided by §4, against a record whose hash has been checked.</p>
+</section>
+
+<section>
   <h2>4 · Conformance</h2>
   <p>Three cumulative levels. A certificate at one level meets every criterion at the levels below it.</p>
   <table>
