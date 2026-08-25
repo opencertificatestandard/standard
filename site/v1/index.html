@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open Certificate Standard v1</title>
+<meta name="description" content="An open, machine-testable format for compliance certificates issued for residential property. Draft for consultation.">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header class="masthead">
+  <p class="eyebrow"><a href="../">Open Certificate Standard</a></p>
+  <h1>Version 1 <span class="tag">Draft for consultation</span></h1>
+  <p class="lede">Every record claiming this version carries the identifier <code>https://opencertificatestandard.org/v1</code>. This page is what it points to.</p>
+</header>
+
+<main>
+<section>
+  <h2>Status</h2>
+  <p>A publicly available specification for the form, content and handling of compliance certificates issued for residential property. It is published openly so anyone can test a certificate against it, including competing software companies, letting agents and landlords.</p>
+  <p class="callout"><strong>The law comes first.</strong> Nothing here overrides a statutory requirement, a British Standard or a scheme rule. Where this standard and the law differ, the law applies. Conformance is not a legal opinion. It does not by itself make a certificate valid, because validity also rests on the competence of whoever carried out the inspection and on the accuracy of what they wrote down.</p>
+  <p>Licence: CC BY 4.0. You may implement, quote and build on this standard, with attribution. Test vectors and tooling are MIT.</p>
+  <p>The keywords MUST, MUST NOT, SHOULD, SHOULD NOT and MAY are used as defined in RFC 2119.</p>
+</section>
+
+<section>
+  <h2>1 · What this standard governs</h2>
+  <p>A <strong>compliance certificate</strong> is any document issued by a competent person that records the inspection, testing, servicing or commissioning of an installation or appliance at a property, where someone else may later rely on it. That someone else might be a landlord, an agent, a tenant, a local authority, an insurer, a court, or a national register.</p>
+  <p>This standard governs <strong>the record</strong>. The document is one way of showing it.</p>
+  <p>If a certificate's identity is the bytes of one PDF, that PDF becomes the legal record. The layout can never be corrected. The software is stuck on the same PDF library forever. A document with a real mistake in it cannot be fixed, because fixing it makes it look tampered with. If the identity is the data instead, a PDF, a web page and a printout of the same record are all equally valid. None of them is the record.</p>
+  <p>It does not cover inspection method, test procedure, competence or classification coding. Those belong to BS 7671, the Gas Safe Register, OFTEC, HETAS, BS 5839 and the relevant statutory instruments. This standard starts where the inspection finishes.</p>
+</section>
+
+<section>
+  <h2>2 · The record</h2>
+  <p>A record is a JSON object. Only <code>spec</code>, <code>rules</code>, <code>issuedAt</code> and <code>recordVersion</code> are required. Everything else is built from whatever the certificate actually answered, and the checks in §4 decide what that means. A missing answer is reported as missing. Nothing is filled in on its behalf.</p>
+  <pre><code>{
+  "spec":       "https://opencertificatestandard.org/v1",
+  "subject":    { "address", "postcode" },
+  "dutyHolder": { "name", "address" },
+  "issuer":     { "name", "registration", "scheme" },
+  "inspection": { "date", "type", "typeName" },
+  "items":      [ { "description", "location", "outcome", "defects" } ],
+  "rules":      { "schemaId", "version" },
+  "issuedAt":   "RFC 3339 instant, UTC, millisecond precision",
+  "recordVersion": 1,
+  "supersedes": "hash of the record this one replaces"
+}</code></pre>
+  <p><strong>No company name appears in the format.</strong> A competitor will not adopt a format with a rival's name inside every document, and this standard is worth nothing unless other people implement it.</p>
+  <p>A correction is a new record that names the hash of the one it replaces. Records are never edited. The one it replaces stays checkable.</p>
+</section>
+
+<section>
+  <h2>3 · Canonicalisation and hashing</h2>
+  <p>A record's identity is the SHA-256 of its canonical serialisation. The algorithm identifier is <code>jcs-sha256-v1</code> and MUST be stored beside the hash.</p>
+  <p class="callout"><strong>An algorithm identifier never changes meaning.</strong> A new algorithm gets a new identifier, and both stay checkable. Redefining an existing one would break every hash already issued.</p>
+  <h3>Rules</h3>
+  <ol class="rules">
+    <li><strong>Serialise per RFC 8785</strong> (JSON Canonicalization Scheme). Object keys sorted by UTF-16 code unit, no insignificant whitespace, ECMAScript number formatting. A locale-aware sort does not conform.</li>
+    <li><strong>Absent, <code>null</code>, <code>""</code> and whitespace mean the same thing.</strong> The key is dropped before hashing. Implementations are most likely to disagree here. Get it wrong and two systems give the same certificate two different identities.</li>
+    <li><strong>An empty container is absent.</strong> Test this after normalising its members, so <code>[]</code>, <code>{}</code> and an object whose values are all blank are treated the same way. Writing <code>"dutyHolder": {}</code> and leaving the key out MUST produce the same hash.</li>
+    <li><strong>An array element is never dropped.</strong> A blank entry becomes <code>null</code> and keeps its place. Removing it would renumber every item after it and attach a defect to the wrong appliance. A list with no elements is absent. A list holding one blank entry is not.</li>
+    <li><strong>Strings are Unicode NFC and trimmed.</strong> Two strings that look identical can hold different code points. Without normalising them they hash differently, and whoever is checking cannot tell that apart from tampering.</li>
+    <li><strong><code>false</code> and <code>0</code> are answers.</strong> Never drop them. Treating them as absent erases "no" from a safety record.</li>
+    <li><strong>Refuse NaN, Infinity and integers beyond 2<sup>53</sup>.</strong> Do not coerce them. <code>JSON.stringify</code> turns NaN into <code>null</code>, so a corrupt meter reading would otherwise hash as a legitimate blank.</li>
+    <li><strong>Dates are <code>YYYY-MM-DD</code> in the local day the work was done.</strong> Do not convert the timezone. An early-morning inspection converted to UTC lands on the previous day, and the date on a safety record sets when the next one is due.</li>
+    <li><strong>The moment of issue is RFC 3339 UTC at millisecond precision.</strong> The same instant reaches different systems written different ways. Hashing the spelling gives one certificate two identities.</li>
+  </ol>
+  <p><a href="test-vectors.json">Nine test vectors</a> exercise every rule above. Each carries the record, its canonical string and its hash. Compare the canonical string first. A mismatch there points at one serialisation rule. A mismatch on the hash alone only tells you something differs somewhere.</p>
+</section>
+
+<section>
+  <h2>4 · Conformance</h2>
+  <p>Three cumulative levels. A certificate at one level meets every criterion at the levels below it.</p>
+  <table>
+    <thead><tr><th>Level</th><th>Name</th><th>The question it answers</th></tr></thead>
+    <tbody>
+      <tr><td><strong>A</strong></td><td>Valid</td><td>Does it contain everything the law names?</td></tr>
+      <tr><td><strong>AA</strong></td><td>Handover</td><td>Can a non-expert read it and act on it?</td></tr>
+      <tr><td><strong>AAA</strong></td><td>Evidenced</td><td>Can you prove, later, what was issued and to whom?</td></tr>
+    </tbody>
+  </table>
+  <p>Every check is written so software can decide it. A check that cannot be run automatically does not belong here.</p>
+
+  <h3>Level A: the particulars</h3>
+  <table>
+    <thead><tr><th>ID</th><th>Criterion</th></tr></thead>
+    <tbody>
+      <tr><td>A1</td><td>The name and address of the landlord or their agent are present, where the certificate is issued in respect of let premises. Not blank, not "as above", not a name alone.</td></tr>
+      <tr><td>A2</td><td>The address of the subject property is present with its postcode, stated separately from A1.</td></tr>
+      <tr><td>A3</td><td>The issuer's name and registration number are present.</td></tr>
+      <tr><td>A5</td><td>The date the inspection was carried out is stated, and is not in the future.</td></tr>
+      <tr><td>A6</td><td>Every item inspected is individually described <em>and</em> located. A count, a room, or "all appliances" does not satisfy A6.</td></tr>
+      <tr><td>A7</td><td>An unambiguous outcome in words is stated for every item. Colour or tick style alone does not satisfy A7.</td></tr>
+      <tr><td>A8</td><td>Defects are recorded, or an explicit statement that none were identified. Blank does not mean none.</td></tr>
+    </tbody>
+  </table>
+  <p class="callout"><strong>Two kinds of failure. Keep them apart.</strong> A check fails either because the person filling the form left a box empty, or because the form has no box to leave empty. The engineer can fix the first before issuing. Only whoever maintains the form can fix the second. Software that treats them the same and refuses to issue on either will refuse whole certificate types, for a reason nobody holding the phone can do anything about.</p>
+  <p>Levels AA and AAA cover the document and the evidence around it: a page-one summary, the next-due date, a real text layer, a minimum type size, predictable file naming, a verification link, proof of service, retention, supersession chains and property-pack export. These are recorded rather than blocking.</p>
+</section>
+
+<section>
+  <h2>5 · Claiming conformance</h2>
+  <p>A conformance claim MUST state the version of the standard, the level claimed, the certificate types covered, the date, and who is making the claim. Do not claim a level without running the checks. Do not claim a level while any check is unrun.</p>
+</section>
+
+<section>
+  <h2>6 · Open questions</h2>
+  <p>These are real questions, not rhetorical ones. Comments wanted on all of them. <a href="https://github.com/opencertificatestandard/standard/issues">Open an issue</a>, or write to <a href="mailto:support@certbox.app">support@certbox.app</a>.</p>
+  <ul>
+    <li>Can A7 be met by certificate types that record one result for the whole document rather than one per item?</li>
+    <li>Should A3 require the registration scheme as well as the number, given schemes differ by trade and by country?</li>
+    <li>Is <code>jcs-sha256-v1</code> the right first algorithm, or should a signature scheme sit alongside it from the start?</li>
+    <li>Should the record carry its own conformance verdict? This draft says no. Anyone must be able to recompute the hash from the details alone, and including a computed verdict would mean they also needed an identical checking engine, not just an identical serialiser.</li>
+  </ul>
+</section>
+</main>
+
+<footer>
+  <p>Draft for consultation. Published under CC BY 4.0.</p>
+  <p><a href="test-vectors.json">Test vectors</a> · <a href="../">About this standard</a></p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,307 @@
+{
+  "spec": "https://opencertificatestandard.org/v1",
+  "version": "1.0",
+  "algorithm": "jcs-sha256-v1",
+  "generated": "Regenerate with scripts/gen-ocs-vectors.mts; do not hand-edit.",
+  "howToUse": "For each vector: canonicalise the record and compare with `canonical` byte for byte, then SHA-256 the UTF-8 bytes of that string and compare the lowercase hex with `hash`. A mismatch on `canonical` localises the bug to a serialisation rule; a mismatch on `hash` alone means the digest or the encoding.",
+  "vectors": [
+    {
+      "name": "minimal",
+      "tests": "The smallest record that means anything. Start here.",
+      "record": {
+        "spec": "https://opencertificatestandard.org/v1",
+        "subject": {
+          "address": "12 Bath Road, Bath",
+          "postcode": "BA1 2XY"
+        },
+        "issuer": {
+          "name": "J Engineer",
+          "registration": "123456"
+        },
+        "inspection": {
+          "date": "2026-08-20",
+          "type": "GB/GS-01",
+          "typeName": "Landlord Gas Safety Record"
+        },
+        "rules": {
+          "schemaId": "GB/GS-01",
+          "version": 2
+        },
+        "issuedAt": "2026-08-20T09:15:00.000Z",
+        "recordVersion": 1
+      },
+      "canonical": "{\"inspection\":{\"date\":\"2026-08-20\",\"type\":\"GB/GS-01\",\"typeName\":\"Landlord Gas Safety Record\"},\"issuedAt\":\"2026-08-20T09:15:00.000Z\",\"issuer\":{\"name\":\"J Engineer\",\"registration\":\"123456\"},\"recordVersion\":1,\"rules\":{\"schemaId\":\"GB/GS-01\",\"version\":2},\"spec\":\"https://opencertificatestandard.org/v1\",\"subject\":{\"address\":\"12 Bath Road, Bath\",\"postcode\":\"BA1 2XY\"}}",
+      "hash": "e5d675ec16bbed36b148b29db7e34bfeffa969d97b178504ddb7e055a479d876"
+    },
+    {
+      "name": "key-order-does-not-matter",
+      "tests": "Keys are sorted by UTF-16 code unit before hashing (RFC 8785 §3.2.3). This record is the \"minimal\" one with its keys written in a different order and MUST produce an identical hash. A locale-aware sort will fail this.",
+      "record": {
+        "recordVersion": 1,
+        "issuedAt": "2026-08-20T09:15:00.000Z",
+        "rules": {
+          "version": 2,
+          "schemaId": "GB/GS-01"
+        },
+        "inspection": {
+          "typeName": "Landlord Gas Safety Record",
+          "type": "GB/GS-01",
+          "date": "2026-08-20"
+        },
+        "issuer": {
+          "registration": "123456",
+          "name": "J Engineer"
+        },
+        "subject": {
+          "postcode": "BA1 2XY",
+          "address": "12 Bath Road, Bath"
+        },
+        "spec": "https://opencertificatestandard.org/v1"
+      },
+      "canonical": "{\"inspection\":{\"date\":\"2026-08-20\",\"type\":\"GB/GS-01\",\"typeName\":\"Landlord Gas Safety Record\"},\"issuedAt\":\"2026-08-20T09:15:00.000Z\",\"issuer\":{\"name\":\"J Engineer\",\"registration\":\"123456\"},\"recordVersion\":1,\"rules\":{\"schemaId\":\"GB/GS-01\",\"version\":2},\"spec\":\"https://opencertificatestandard.org/v1\",\"subject\":{\"address\":\"12 Bath Road, Bath\",\"postcode\":\"BA1 2XY\"}}",
+      "hash": "e5d675ec16bbed36b148b29db7e34bfeffa969d97b178504ddb7e055a479d876"
+    },
+    {
+      "name": "absent-null-empty-and-blank-are-the-same",
+      "tests": "THE RULE MOST LIKELY TO BE IMPLEMENTED DIFFERENTLY. An unanswered field may reach a system as a missing key, null, \"\", or whitespace. All four are ABSENT and are dropped before hashing. This record MUST hash identically to \"minimal\": one vendor writing \"\" where another omits the key would otherwise produce a different identity for an identical certificate.",
+      "record": {
+        "spec": "https://opencertificatestandard.org/v1",
+        "subject": {
+          "address": "12 Bath Road, Bath",
+          "postcode": "BA1 2XY"
+        },
+        "dutyHolder": {
+          "name": "",
+          "address": null
+        },
+        "issuer": {
+          "name": "J Engineer",
+          "registration": "123456",
+          "scheme": "   "
+        },
+        "inspection": {
+          "date": "2026-08-20",
+          "type": "GB/GS-01",
+          "typeName": "Landlord Gas Safety Record"
+        },
+        "items": [],
+        "rules": {
+          "schemaId": "GB/GS-01",
+          "version": 2
+        },
+        "issuedAt": "2026-08-20T09:15:00.000Z",
+        "recordVersion": 1
+      },
+      "canonical": "{\"inspection\":{\"date\":\"2026-08-20\",\"type\":\"GB/GS-01\",\"typeName\":\"Landlord Gas Safety Record\"},\"issuedAt\":\"2026-08-20T09:15:00.000Z\",\"issuer\":{\"name\":\"J Engineer\",\"registration\":\"123456\"},\"recordVersion\":1,\"rules\":{\"schemaId\":\"GB/GS-01\",\"version\":2},\"spec\":\"https://opencertificatestandard.org/v1\",\"subject\":{\"address\":\"12 Bath Road, Bath\",\"postcode\":\"BA1 2XY\"}}",
+      "hash": "e5d675ec16bbed36b148b29db7e34bfeffa969d97b178504ddb7e055a479d876"
+    },
+    {
+      "name": "a-blank-item-is-not-no-items",
+      "tests": "The emptiness rule stops at the container. An empty ARRAY is absent, but an array holding one blank entry is a one-entry array whose entry is null — dropping it would renumber every item after it and reattribute defects to the wrong appliance.",
+      "record": {
+        "spec": "https://opencertificatestandard.org/v1",
+        "subject": {
+          "address": "12 Bath Road, Bath",
+          "postcode": "BA1 2XY"
+        },
+        "issuer": {
+          "name": "J Engineer",
+          "registration": "123456"
+        },
+        "inspection": {
+          "date": "2026-08-20",
+          "type": "GB/GS-01",
+          "typeName": "Landlord Gas Safety Record"
+        },
+        "items": [
+          {
+            "description": "",
+            "location": ""
+          },
+          {
+            "description": "Boiler",
+            "location": "Kitchen"
+          }
+        ],
+        "rules": {
+          "schemaId": "GB/GS-01",
+          "version": 2
+        },
+        "issuedAt": "2026-08-20T09:15:00.000Z",
+        "recordVersion": 1
+      },
+      "canonical": "{\"inspection\":{\"date\":\"2026-08-20\",\"type\":\"GB/GS-01\",\"typeName\":\"Landlord Gas Safety Record\"},\"issuedAt\":\"2026-08-20T09:15:00.000Z\",\"issuer\":{\"name\":\"J Engineer\",\"registration\":\"123456\"},\"items\":[null,{\"description\":\"Boiler\",\"location\":\"Kitchen\"}],\"recordVersion\":1,\"rules\":{\"schemaId\":\"GB/GS-01\",\"version\":2},\"spec\":\"https://opencertificatestandard.org/v1\",\"subject\":{\"address\":\"12 Bath Road, Bath\",\"postcode\":\"BA1 2XY\"}}",
+      "hash": "662fee232518779949a71d983cbf344dc49c9ab5c5e19bfed10345893f2d823a"
+    },
+    {
+      "name": "no-and-zero-are-answers",
+      "tests": "false and 0 are ANSWERS and are never dropped. Treating them as absent would erase \"no\" from a safety record, which is the most dangerous normalisation error available.",
+      "record": {
+        "spec": "https://opencertificatestandard.org/v1",
+        "subject": {
+          "address": "12 Bath Road, Bath",
+          "postcode": "BA1 2XY"
+        },
+        "issuer": {
+          "name": "J Engineer",
+          "registration": "123456"
+        },
+        "inspection": {
+          "date": "2026-08-20",
+          "type": "GB/GS-01",
+          "typeName": "Landlord Gas Safety Record"
+        },
+        "items": [
+          {
+            "description": "Boiler",
+            "location": "Kitchen",
+            "outcome": "Fail",
+            "defects": "Flue blocked"
+          }
+        ],
+        "rules": {
+          "schemaId": "GB/GS-01",
+          "version": 2
+        },
+        "issuedAt": "2026-08-20T09:15:00.000Z",
+        "recordVersion": 1,
+        "safeToUse": false,
+        "operatingPressure": 0
+      },
+      "canonical": "{\"inspection\":{\"date\":\"2026-08-20\",\"type\":\"GB/GS-01\",\"typeName\":\"Landlord Gas Safety Record\"},\"issuedAt\":\"2026-08-20T09:15:00.000Z\",\"issuer\":{\"name\":\"J Engineer\",\"registration\":\"123456\"},\"items\":[{\"defects\":\"Flue blocked\",\"description\":\"Boiler\",\"location\":\"Kitchen\",\"outcome\":\"Fail\"}],\"operatingPressure\":0,\"recordVersion\":1,\"rules\":{\"schemaId\":\"GB/GS-01\",\"version\":2},\"safeToUse\":false,\"spec\":\"https://opencertificatestandard.org/v1\",\"subject\":{\"address\":\"12 Bath Road, Bath\",\"postcode\":\"BA1 2XY\"}}",
+      "hash": "20ed8d1b5577707a2f4595d07abad4c8bead9ab83ac41b3c8774c53489fcdc72"
+    },
+    {
+      "name": "unicode-is-normalised-to-nfc",
+      "tests": "Two visually identical strings can carry different code points — é as one code point, or e followed by a combining accent. Without NFC they hash differently, which is indistinguishable from tampering to whoever is checking. Strings are also trimmed. This record uses the DECOMPOSED form and MUST hash the same as the composed one.",
+      "record": {
+        "spec": "https://opencertificatestandard.org/v1",
+        "subject": {
+          "address": "  12 Rue de la Paix, Valérie House  ",
+          "postcode": "BA1 2XY"
+        },
+        "issuer": {
+          "name": "José Engineer",
+          "registration": "123456"
+        },
+        "inspection": {
+          "date": "2026-08-20",
+          "type": "GB/GS-01",
+          "typeName": "Landlord Gas Safety Record"
+        },
+        "rules": {
+          "schemaId": "GB/GS-01",
+          "version": 2
+        },
+        "issuedAt": "2026-08-20T09:15:00.000Z",
+        "recordVersion": 1
+      },
+      "canonical": "{\"inspection\":{\"date\":\"2026-08-20\",\"type\":\"GB/GS-01\",\"typeName\":\"Landlord Gas Safety Record\"},\"issuedAt\":\"2026-08-20T09:15:00.000Z\",\"issuer\":{\"name\":\"José Engineer\",\"registration\":\"123456\"},\"recordVersion\":1,\"rules\":{\"schemaId\":\"GB/GS-01\",\"version\":2},\"spec\":\"https://opencertificatestandard.org/v1\",\"subject\":{\"address\":\"12 Rue de la Paix, Valérie House\",\"postcode\":\"BA1 2XY\"}}",
+      "hash": "21777fae1684d9f2f7ed9487f03935a65f2a1843bfff93ead8761756e2bcb4ef"
+    },
+    {
+      "name": "unicode-composed-twin",
+      "tests": "The other half of the NFC rule, and the half that proves it. Byte for byte this record differs from \"unicode-is-normalised-to-nfc\" — it spells the accents as single composed code points instead of a letter plus a combining accent — and it MUST produce the SAME hash. An implementation that skips normalisation passes each vector alone and fails this pair.",
+      "record": {
+        "spec": "https://opencertificatestandard.org/v1",
+        "subject": {
+          "address": "  12 Rue de la Paix, Valérie House  ",
+          "postcode": "BA1 2XY"
+        },
+        "issuer": {
+          "name": "José Engineer",
+          "registration": "123456"
+        },
+        "inspection": {
+          "date": "2026-08-20",
+          "type": "GB/GS-01",
+          "typeName": "Landlord Gas Safety Record"
+        },
+        "rules": {
+          "schemaId": "GB/GS-01",
+          "version": 2
+        },
+        "issuedAt": "2026-08-20T09:15:00.000Z",
+        "recordVersion": 1
+      },
+      "canonical": "{\"inspection\":{\"date\":\"2026-08-20\",\"type\":\"GB/GS-01\",\"typeName\":\"Landlord Gas Safety Record\"},\"issuedAt\":\"2026-08-20T09:15:00.000Z\",\"issuer\":{\"name\":\"José Engineer\",\"registration\":\"123456\"},\"recordVersion\":1,\"rules\":{\"schemaId\":\"GB/GS-01\",\"version\":2},\"spec\":\"https://opencertificatestandard.org/v1\",\"subject\":{\"address\":\"12 Rue de la Paix, Valérie House\",\"postcode\":\"BA1 2XY\"}}",
+      "hash": "21777fae1684d9f2f7ed9487f03935a65f2a1843bfff93ead8761756e2bcb4ef"
+    },
+    {
+      "name": "let-premises-with-a-duty-holder",
+      "tests": "A complete Level A record for let premises: the landlord named and addressed separately from the property, every item described, located and given an outcome.",
+      "record": {
+        "spec": "https://opencertificatestandard.org/v1",
+        "subject": {
+          "address": "12 Bath Road, Bath",
+          "postcode": "BA1 2XY"
+        },
+        "dutyHolder": {
+          "name": "A Landlord",
+          "address": "9 Other Street, Bristol, BS1 4AA"
+        },
+        "issuer": {
+          "name": "J Engineer",
+          "registration": "123456",
+          "scheme": "Gas Safe"
+        },
+        "inspection": {
+          "date": "2026-08-20",
+          "type": "GB/GS-01",
+          "typeName": "Landlord Gas Safety Record"
+        },
+        "items": [
+          {
+            "description": "Combination boiler",
+            "location": "Kitchen",
+            "outcome": "Pass",
+            "defects": "None identified"
+          },
+          {
+            "description": "Gas fire",
+            "location": "Lounge",
+            "outcome": "Fail",
+            "defects": "Flue spillage; appliance capped"
+          }
+        ],
+        "rules": {
+          "schemaId": "GB/GS-01",
+          "version": 2
+        },
+        "issuedAt": "2026-08-20T09:15:00.000Z",
+        "recordVersion": 1
+      },
+      "canonical": "{\"dutyHolder\":{\"address\":\"9 Other Street, Bristol, BS1 4AA\",\"name\":\"A Landlord\"},\"inspection\":{\"date\":\"2026-08-20\",\"type\":\"GB/GS-01\",\"typeName\":\"Landlord Gas Safety Record\"},\"issuedAt\":\"2026-08-20T09:15:00.000Z\",\"issuer\":{\"name\":\"J Engineer\",\"registration\":\"123456\",\"scheme\":\"Gas Safe\"},\"items\":[{\"defects\":\"None identified\",\"description\":\"Combination boiler\",\"location\":\"Kitchen\",\"outcome\":\"Pass\"},{\"defects\":\"Flue spillage; appliance capped\",\"description\":\"Gas fire\",\"location\":\"Lounge\",\"outcome\":\"Fail\"}],\"recordVersion\":1,\"rules\":{\"schemaId\":\"GB/GS-01\",\"version\":2},\"spec\":\"https://opencertificatestandard.org/v1\",\"subject\":{\"address\":\"12 Bath Road, Bath\",\"postcode\":\"BA1 2XY\"}}",
+      "hash": "13eb63546277cd9e8aa19251bea5dcc0ba7c674627be1b19359a3adeebfbf14f"
+    },
+    {
+      "name": "a-reissue-supersedes-its-predecessor",
+      "tests": "A correction is a NEW record naming the hash of the one it replaces, never an edit. The predecessor stays verifiable for ever.",
+      "record": {
+        "spec": "https://opencertificatestandard.org/v1",
+        "subject": {
+          "address": "12 Bath Road, Bath",
+          "postcode": "BA1 2XY"
+        },
+        "issuer": {
+          "name": "J Engineer",
+          "registration": "123456"
+        },
+        "inspection": {
+          "date": "2026-08-20",
+          "type": "GB/GS-01",
+          "typeName": "Landlord Gas Safety Record"
+        },
+        "rules": {
+          "schemaId": "GB/GS-01",
+          "version": 2
+        },
+        "issuedAt": "2026-08-21T11:00:00.000Z",
+        "recordVersion": 2,
+        "supersedes": "e5d675ec16bbed36b148b29db7e34bfeffa969d97b178504ddb7e055a479d876"
+      },
+      "canonical": "{\"inspection\":{\"date\":\"2026-08-20\",\"type\":\"GB/GS-01\",\"typeName\":\"Landlord Gas Safety Record\"},\"issuedAt\":\"2026-08-21T11:00:00.000Z\",\"issuer\":{\"name\":\"J Engineer\",\"registration\":\"123456\"},\"recordVersion\":2,\"rules\":{\"schemaId\":\"GB/GS-01\",\"version\":2},\"spec\":\"https://opencertificatestandard.org/v1\",\"subject\":{\"address\":\"12 Bath Road, Bath\",\"postcode\":\"BA1 2XY\"},\"supersedes\":\"e5d675ec16bbed36b148b29db7e34bfeffa969d97b178504ddb7e055a479d876\"}",
+      "hash": "aea387901a3ebf8c8bf39bca4de212c08e6a7619f8768abb8eac58c14af19dc7"
+    }
+  ]
+}

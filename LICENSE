@@ -1,0 +1,30 @@
+Open Certificate Standard — specification licence
+=================================================
+
+The specification text in this repository is licensed under the
+Creative Commons Attribution 4.0 International licence.
+
+    SPDX-License-Identifier: CC-BY-4.0
+
+    Full legal text: https://creativecommons.org/licenses/by/4.0/legalcode
+    Human-readable summary: https://creativecommons.org/licenses/by/4.0/
+
+You may share and adapt this specification for any purpose, including
+commercially, provided you give appropriate credit, link to the licence, and
+indicate whether changes were made.
+
+WHAT THIS LICENCE DOES NOT GRANT
+
+It does not permit you to describe a product as conforming to, or certified
+against, this standard without having run the conformance criteria. A
+conformance claim must state the version of the standard, the level claimed,
+the certificate types covered, the date, and who is making the claim.
+
+CODE AND TEST VECTORS ARE LICENSED SEPARATELY
+
+Everything that is not specification text — the test vectors, the reference
+checker, and any tooling — is licensed under the MIT licence. See LICENSE-CODE.
+
+That split is deliberate. An implementer copying the test vectors into their
+own test suite should not inherit attribution obligations inside their test
+files, because that friction is exactly what stops people bothering.

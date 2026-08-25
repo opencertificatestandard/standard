@@ -1,0 +1,17 @@
+# Kept short on purpose: this is a specification repository, not an application.
+node_modules/
+dist/
+
+# Local deploy state. Holds the Cloudflare account id and has been committed
+# by accident on this project before.
+.wrangler/
+
+# Never in a public repository.
+.env
+.env.*
+
+# Editor and OS noise.
+.DS_Store
+.idea/
+.vscode/
+*.swp

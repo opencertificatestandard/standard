@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open Certificate Standard</title>
+<meta name="description" content="An open format for property compliance certificates. Check that a certificate is genuine and complete, move your records between suppliers, and get ready for machine-readable compliance.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="masthead">
+  <p class="eyebrow">Open Certificate Standard</p>
+  <h1>A compliance certificate anyone can check <span class="tag">Draft v1</span></h1>
+  <p class="lede">An open format for gas, electrical and fire safety certificates. Free to implement, free to use, owned by no one.</p>
+</header>
+
+<main>
+<section>
+  <h2>What it gives you</h2>
+
+  <h3>If you own or manage rented property</h3>
+  <p>You can check a certificate without ringing the engineer who wrote it. The details the law requires either appear on it or they do not, and software can tell you which in a second rather than a solicitor telling you in a year.</p>
+  <p>Your compliance history stops being locked inside one contractor's software. A record in this format moves between suppliers, into a property pack, or into a register, without being retyped.</p>
+  <p>You can also see what a certificate is missing before somebody else does. A gas safety record without the landlord's address on it is a problem the day a tenant disputes a notice, not the day it was issued.</p>
+
+  <h3>If you build software for the trade</h3>
+  <p>You do not have to invent a format. This one is specified, implemented and running, with <a href="v1/test-vectors.json">nine test vectors</a> so you can prove your implementation agrees with everyone else's before you ship it.</p>
+  <p>It removes a sales objection rather than creating one. Customers who ask whether they can get their data out have an answer, and customers moving to you can bring their history with them.</p>
+  <p>No company name appears anywhere in the format. Adopting it does not put a competitor's brand inside your documents.</p>
+
+  <h3>If you set or enforce the rules</h3>
+  <p>This gives you a definition of a compliance certificate that a machine can check, rather than a description that needs a person to interpret it. Every requirement in it is written so software can decide whether a document meets it.</p>
+  <p>It is published under an open licence with the specification, the conformance checks and the test data all public. Nothing about it depends on any one supplier continuing to exist.</p>
+</section>
+
+<section>
+  <h2>Why now</h2>
+  <p>The Renters' Rights Act creates a national database of privately rented property, with phased rollout from late 2026. Landlords will have to register, and compliance certificates are expected to form part of what gets held there. The technical requirements are not yet published.</p>
+  <p>Today every supplier holds certificate data in its own private shape. When a national register does need machine-readable certificates, the industry will either have a shared format or it will have a scramble. This is a format offered early, in the open, so that it can be argued with and improved before anyone has to rely on it.</p>
+</section>
+
+<section>
+  <h2>How it works</h2>
+  <p>Three parts.</p>
+  <ol class="rules">
+    <li><strong>A record.</strong> A small JSON object holding the details the law asks for: the property, the landlord, the engineer, the date, and what was found.</li>
+    <li><strong>A fingerprint.</strong> The record is turned into one canonical form and hashed, so anyone can confirm that the certificate they are holding says exactly what was issued. Two independent systems produce the same fingerprint from the same record.</li>
+    <li><strong>Checks anyone can run.</strong> Conformance at three levels: does it contain what the law names, can a non-expert read it and act on it, and can you prove later what was issued and to whom.</li>
+  </ol>
+  <p class="callout"><strong>The document is not the record.</strong> If a certificate's identity is the bytes of one PDF, that PDF becomes the legal record: the layout can never be corrected and a document with a real mistake in it cannot be fixed, because fixing it makes it look tampered with. Here the identity is the data. A PDF, a web page and a printout of the same record are all equally valid.</p>
+</section>
+
+<section>
+  <h2>Implement it</h2>
+  <ul>
+    <li><a href="v1/">The specification, version 1</a>. The record format, the nine hashing rules, and the conformance checks.</li>
+    <li><a href="v1/test-vectors.json">Test vectors</a>. Nine records with their canonical form and expected fingerprint, covering the cases where implementations disagree. Run these first.</li>
+    <li><a href="https://github.com/opencertificatestandard/standard">The repository</a>. Specification text under CC BY 4.0, test vectors and tooling under MIT, so copying the vectors into your own test suite costs you nothing.</li>
+  </ul>
+  <p>There is no membership, no fee, no registration and nobody to ask for permission.</p>
+</section>
+
+<section>
+  <h2>Conformance is measured</h2>
+  <p>Anyone can claim to follow a standard. This one is built so the claim can be checked by whoever receives the certificate. A conformance claim states the version, the level, the certificate types it covers, the date, and who is making it, and each of those can be tested against real documents.</p>
+  <p>Published figures are expected to be partial at first. The implementation behind this draft covers 273 certificate types, of which 121 currently produce a Level A record. The remainder are held back by fields their forms do not yet collect, mostly an outcome or a defect recorded against each individual item.</p>
+  <p>Suppliers adopting the standard are encouraged to publish their own figures the same way, including the gaps. A conformance level that only ever goes up tells a landlord nothing.</p>
+</section>
+
+<section>
+  <h2>Status and governance</h2>
+  <p>This is a draft, version 1, published for comment. No standards body has adopted it. It was written by <a href="https://certbox.app">CertBox</a>, which makes certificate software for tradespeople, and the working implementation came before the specification.</p>
+  <p>Authorship is not ownership. The licence permits anyone to implement it, fork it or extend it, no company name appears in the format, and long-term governance is one of the open questions below.</p>
+</section>
+
+<section>
+  <h2>Take part</h2>
+  <p>Comments are wanted from software companies, letting agents, landlords, trade bodies and anyone working on the private rented sector database. The open questions are listed at the end of <a href="v1/">the specification</a> and they are real questions.</p>
+  <p><a href="https://github.com/opencertificatestandard/standard/issues">Open an issue on GitHub</a>, where other implementers can read the discussion and disagree in public. For anything private, write to <a href="mailto:support@certbox.app">support@certbox.app</a>.</p>
+</section>
+</main>
+
+<footer>
+  <p>Open Certificate Standard, draft version 1. Specification CC BY 4.0, tooling MIT.</p>
+  <p><a href="v1/">Specification</a> · <a href="v1/test-vectors.json">Test vectors</a> · <a href="https://github.com/opencertificatestandard/standard">GitHub</a></p>
+</footer>
+</body>
+</html>
